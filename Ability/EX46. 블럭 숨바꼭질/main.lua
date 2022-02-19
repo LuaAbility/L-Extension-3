@@ -1,63 +1,111 @@
+local effect = import("$.potion.PotionEffectType")
+
 function Init(abilityData)
-	plugin.registerEvent(abilityData, "중력 전환", "PlayerInteractEvent", 1800)
-	plugin.registerEvent(abilityData, "EX043-calculateDamage", "EntityDamageEvent", 0)
+	plugin.registerEvent(abilityData, "EX046-damage", "PlayerInteractEvent", 0)
+	plugin.registerEvent(abilityData, "EX046-cancelBreak", "BlockBreakEvent", 0)
+	plugin.registerEvent(abilityData, "EX046-cancelDamage", "EntityDamageEvent", 0)
 end
 
 function onEvent(funcTable)
-	if funcTable[1] == "중력 전환" then useAbility(funcTable[3], funcTable[2], funcTable[4], funcTable[1]) end
+	if funcTable[1] == "EX046-damage" then damaged(funcTable[3], funcTable[2], funcTable[4], funcTable[1]) end
+	if funcTable[1] == "EX046-cancelBreak" then cancelBreak(funcTable[3], funcTable[2], funcTable[4], funcTable[1]) end
+	if funcTable[1] == "EX046-cancelDamage" and funcTable[2]:getEventName() == "EntityDamageByEntityEvent" then cancelDamage(funcTable[3], funcTable[2], funcTable[4], funcTable[1]) end
 end
 
 function onTimer(player, ability)
-	if player:getVariable("EX043-abilityTime") == nil then 
-		player:setVariable("EX043-abilityTime", 0) 
-	end	
-
-	local abilityTime = player:getVariable("EX043-abilityTime")
-	if abilityTime > 0 then
-		abilityTime = abilityTime - 2
-		if abilityTime <= 0 then resetGravity(player)
-		else gravity(player) end
-		player:setVariable("EX043-abilityTime", abilityTime) 
+	local bPlayer = player:getPlayer()
+	
+	if bPlayer:isSneaking() then
+		if player:getVariable("EX046-speed") == nil then
+			player:setVariable("EX046-speed", bPlayer:getWalkSpeed())
+		end
+		
+		if player:getVariable("EX046-block") == nil then
+			local targetBlock = bPlayer:getWorld():getBlockAt(bPlayer:getLocation())
+			local copyBlock = bPlayer:getWorld():getBlockAt(bPlayer:getLocation():add(0, -1, 0))
+			
+			if copyBlock:getType() ~= import("$.Material").AIR then
+				player:setVariable("EX046-prevBlock", {targetBlock:getType(), targetBlock:getBlockData():clone()})
+				
+				targetBlock:setType(copyBlock:getType())
+				player:setVariable("EX046-block", targetBlock)
+				
+				local players = util.getTableFromList(game.getAllPlayers())
+				for i = 1, #players do
+					if players[i] ~= game.getPlayer(bPlayer) then
+						players[i]:getPlayer():hidePlayer(plugin.getPlugin(), bPlayer)
+					end
+				end
+				
+				local telLoc = targetBlock:getLocation():clone():add(0.5, 1, 0.5)
+				telLoc:setPitch(bPlayer:getLocation():getPitch())
+				telLoc:setYaw(bPlayer:getLocation():getYaw())
+				
+				bPlayer:teleport(telLoc)
+			end
+		else
+			bPlayer:setFallDistance(0)
+			if util.random() <= 0.005 then
+				local targetBlock = player:getVariable("EX046-block")
+				bPlayer:getWorld():spawnParticle(import("$.Particle").SMOKE_NORMAL, targetBlock:getLocation():add(0.5, 0, 0.5), 100, 0.25, 0.25, 0.25, 0.1)
+			end
+			
+			bPlayer:setWalkSpeed(0)
+			bPlayer:addPotionEffect(newInstance("$.potion.PotionEffect", {effect.JUMP, 3, 250}))
+		end
+	else
+		Reset(player, ability)
 	end
 end
 
-function useAbility(LAPlayer, event, ability, id)
-	if event:getAction():toString() == "RIGHT_CLICK_AIR" or event:getAction():toString() == "RIGHT_CLICK_BLOCK" then
-		if event:getItem() ~= nil then
-			if game.isAbilityItem(event:getItem(), "IRON_INGOT") then
-				if game.checkCooldown(LAPlayer, game.getPlayer(event:getPlayer()), ability, id) then
-					LAPlayer:setVariable("EX043-abilityTime", 100) 
-					
-					local players = util.getTableFromList(game.getPlayers())
-					for i = 1, #players do
-						if players[i] ~= player then 
-							players[i]:getPlayer():setVelocity(players[i]:getPlayer():getVelocity():add(newInstance("$.util.Vector", {0, 0.3, 0})))
-						end
-					end
-				end
-			end
+function Reset(player, ability)
+	local targetBlock = player:getVariable("EX046-block")
+	if targetBlock ~= nil then
+		targetBlock:setType(player:getVariable("EX046-prevBlock")[1])
+		targetBlock:setBlockData(player:getVariable("EX046-prevBlock")[2])
+		player:removeVariable("EX046-block")
+		player:removeVariable("EX046-prevBlock")
+	end
+	
+	local speed = player:getVariable("EX046-speed")
+	if speed ~= nil then
+		player:getPlayer():setWalkSpeed(speed)
+		player:removeVariable("EX046-speed")
+	end
+	
+	local players = util.getTableFromList(game.getAllPlayers())
+	for i = 1, #players do
+		if players[i] ~= game.getPlayer(player:getPlayer()) then
+			players[i]:getPlayer():showPlayer(plugin.getPlugin(), player:getPlayer())
 		end
 	end
 end
 
-function resetGravity(player)
-	local players = util.getTableFromList(game.getPlayers())
-	for i = 1, #players do
-		if players[i] then players[i]:getPlayer():setGravity(true) end
+function damaged(LAPlayer, event, ability, id)
+	if event:getAction():toString() == "LEFT_CLICK_BLOCK" then
+		local targetBlock = LAPlayer:getVariable("EX046-block")
+		if targetBlock ~= nil and targetBlock == event:getClickedBlock() then
+			LAPlayer:getPlayer():getWorld():spawnParticle(import("$.Particle").CRIT, event:getClickedBlock():getLocation():add(0.5, 0, 0.5), 100, 0.25, 0.25, 0.25, 0.1)
+			LAPlayer:getPlayer():getWorld():playSound(LAPlayer:getPlayer():getLocation(), import("$.Sound").ENTITY_PLAYER_ATTACK_CRIT, 0.5, 1)
+			LAPlayer:getPlayer():damage(10, event:getPlayer())
+		end
 	end
 end
 
-function gravity(player)
-	local players = util.getTableFromList(game.getPlayers())
-	for i = 1, #players do
-		if players[i] then 
-			game.sendActionBarMessage(players[i]:getPlayer(), "§a중력 전환!")
-			local addVector = newInstance("$.util.Vector", {0.1 + players[i]:getPlayer():getVelocity():getX() * 0.15, 0, 0})
-			local velocity = players[i]:getPlayer():getVelocity():add(addVector)
-			velocity:setY(velocity:getY() * 0.5)
+function cancelBreak(LAPlayer, event, ability, id)
+	local targetBlock = LAPlayer:getVariable("EX046-block")
+	if targetBlock ~= nil and targetBlock == event:getBlock() then
+		event:setCancelled(true)
+	end
+end
 
-			players[i]:getPlayer():setGravity(false)
-			players[i]:getPlayer():setVelocity(velocity)
+function cancelDamage(LAPlayer, event, ability, id)
+	local damager = event:getDamager()
+	if event:getCause():toString() == "PROJECTILE" then damager = event:getDamager():getShooter() end
+	
+	if game.checkCooldown(LAPlayer, game.getPlayer(damager), ability, id) then
+		if LAPlayer:getVariable("EX046-block") ~= nil then
+			event:setCancelled(true)
 		end
 	end
 end

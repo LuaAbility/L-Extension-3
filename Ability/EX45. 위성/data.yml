@@ -1,7 +1,7 @@
 id: 'LA-EX-045'
 type: '행성'
 name: '위성'
-rank: 'A'
+rank: 'B'
 description: | 
     §b자신 주위를 공전하는 위성을 생성§a합니다.
     §a위성은 §b모든 공격을 방어하며, 파괴되지 않습니다.
