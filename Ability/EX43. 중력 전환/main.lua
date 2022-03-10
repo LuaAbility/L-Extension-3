@@ -40,6 +40,10 @@ function useAbility(LAPlayer, event, ability, id)
 	end
 end
 
+function Reset(player, ability)
+	resetGravity(player)
+end
+
 function resetGravity(player)
 	local players = util.getTableFromList(game.getPlayers())
 	for i = 1, #players do

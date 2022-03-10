@@ -103,7 +103,7 @@ function cancelDamage(LAPlayer, event, ability, id)
 	local damager = event:getDamager()
 	if event:getCause():toString() == "PROJECTILE" then damager = event:getDamager():getShooter() end
 	
-	if game.checkCooldown(LAPlayer, game.getPlayer(damager), ability, id) then
+	if not util.hasClass(damager, "org.bukkit.projectiles.BlockProjectileSource") and game.checkCooldown(LAPlayer, game.getPlayer(damager), ability, id) then
 		if LAPlayer:getVariable("EX046-block") ~= nil then
 			event:setCancelled(true)
 		end

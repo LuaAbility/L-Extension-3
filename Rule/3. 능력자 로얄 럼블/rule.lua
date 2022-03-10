@@ -1,36 +1,34 @@
 local material = import("$.Material") -- 건들면 안됨!
 local effect = import("$.potion.PotionEffectType")  -- 건들면 안됨!
-local joinTick = 400 -- 입장 간격 (틱)
+local joinTick = 200 -- 입장 간격 (틱)
 
-local startX = 169.5 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
+local startX = 74.5 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
 local startY = 65 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
-local startZ = 1323.5 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
+local startZ = 1272.5 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
 
 local startBorderSize = 50.0 -- 시작 시 월드 보더의 크기
 local endBorderSize = 5.0 -- 마지막 월드 보더의 크기
-local borderChangeSecond = 60 -- 월드보더의 크기가 변화하는 시간
+local borderChangeSecond = 30 -- 월드보더의 크기가 변화하는 시간
 	
 local abilityItem = material.IRON_INGOT -- 능력 시전 아이템
 local abilityItemName = "철괴" -- 능력 시전 아이템 이름
 local startItem = {  -- 시작 시 지급 아이템
-	newInstance("$.inventory.ItemStack", {material.IRON_INGOT, 64}),
-	newInstance("$.inventory.ItemStack", {material.GOLD_INGOT, 64}),
-	newInstance("$.inventory.ItemStack", {material.OAK_LOG, 10}),
 	newInstance("$.inventory.ItemStack", {material.WATER_BUCKET, 1}),
+	newInstance("$.inventory.ItemStack", {material.IRON_INGOT, 64}),
+	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
+	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
 	newInstance("$.inventory.ItemStack", {material.FISHING_ROD, 1}),
-	newInstance("$.inventory.ItemStack", {material.BOW, 1}),
-	newInstance("$.inventory.ItemStack", {material.ARROW, 64}),
+	newInstance("$.inventory.ItemStack", {material.OAK_SIGN, 5}),
 	newInstance("$.inventory.ItemStack", {material.SCAFFOLDING, 20}),
-	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
-	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
-	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1})
+	newInstance("$.inventory.ItemStack", {material.BOW, 1}),
+	newInstance("$.inventory.ItemStack", {material.ARROW, 20})
 }
 
 local startEquip = {  -- 시작 시 지급 아이템
-	newInstance("$.inventory.ItemStack", {material.CHAINMAIL_BOOTS, 1}),
-	newInstance("$.inventory.ItemStack", {material.CHAINMAIL_LEGGINGS, 1}),
-	newInstance("$.inventory.ItemStack", {material.CHAINMAIL_CHESTPLATE, 1}),
-	newInstance("$.inventory.ItemStack", {material.CHAINMAIL_HELMET, 1})
+	newInstance("$.inventory.ItemStack", {material.IRON_BOOTS, 1}),
+	newInstance("$.inventory.ItemStack", {material.IRON_LEGGINGS, 1}),
+	newInstance("$.inventory.ItemStack", {material.IRON_CHESTPLATE, 1}),
+	newInstance("$.inventory.ItemStack", {material.IRON_HELMET, 1})
 }
 
 function Init()
@@ -76,6 +74,14 @@ function Init()
 	plugin.banAbilityID("LA-EX-029")
 	plugin.banAbilityID("LA-EX-013")
 	plugin.banAbilityID("LA-EX-008")
+	
+	plugin.banAbilityID("LA-EX-003")
+	plugin.banAbilityID("LA-EX-008")
+	plugin.banAbilityID("LA-EX-008")
+	plugin.banAbilityID("LA-HS-003")
+	plugin.banAbilityID("LA-HS-006")
+	plugin.banAbilityID("LA-HS-010")
+	plugin.banAbilityID("LA-HS-012")
 
 	plugin.registerRuleEvent("PlayerDeathEvent", "eliminate")
 	plugin.registerRuleEvent("PlayerJoinEvent", "spectator")
@@ -106,18 +112,24 @@ end
 
 function cancelPlace(event)
 	local block = event:getBlockPlaced()
-	if block:getLocation():getY() > 100 then 
-		event:setCancelled(true)
-		game.sendMessage(event:getPlayer(), "§4[§cLAbility§4] §c너무 높이 설치하려 합니다!")
+	if block:getLocation():getY() > (startY + 50) then 
+		local player = game.getPlayer(event:getPlayer())
+		if player ~= nil and player.isSurvive then
+			event:setCancelled(true)
+			game.sendMessage(event:getPlayer(), "§4[§cLAbility§4] §c너무 높이 설치하려 합니다!")
+		end
 	end	
 end
 
 function cancelMove(event)
-	if event:getTo():getY() > 100 then 
-		local newTo = event:getTo()
-		newTo:setY(98)
-		event:setTo(newTo)
-		game.sendMessage(event:getPlayer(), "§4[§cLAbility§4] §c너무 높이 올라가려 합니다!")
+	if event:getTo():getY() > (startY + 50) then 
+		local player = game.getPlayer(event:getPlayer())
+		if player ~= nil and player.isSurvive then
+			local newTo = event:getTo()
+			newTo:setY(98)
+			event:setTo(newTo)
+			game.sendMessage(event:getPlayer(), "§4[§cLAbility§4] §c너무 높이 올라가려 합니다!")
+		end
 	end	
 end
 
@@ -282,11 +294,9 @@ function join()
 	local loc = newInstance("$.Location", { joinPlayer:getPlayer():getWorld(), startX, startY, startZ })
 	
 	joinPlayer:setVariable("abilityLock", false)
-	joinPlayer:setVariable("godMode", true)
 	
 	giveItem(joinPlayer:getPlayer(), true)
 	
-	joinPlayer:getPlayer():addPotionEffect(newInstance("$.potion.PotionEffect", {effect.GLOWING, 200, 9}))
 	joinPlayer:getPlayer():setGameMode(import("$.GameMode").SURVIVAL)
 	joinPlayer:getPlayer():teleport(loc)
 	
@@ -311,11 +321,12 @@ function join()
 		joinPlayer:getPlayer():setHealth(joinPlayer:getPlayer():getAttribute(import("$.attribute.Attribute").GENERIC_MAX_HEALTH):getBaseValue())
 	end, 2)
 	
-	util.runLater(function()
-		joinPlayer:setVariable("godMode", false)
-	end, 100)
-	
 	table.remove(playerQueue, 1)
+	
+	local players = util.getTableFromList(game.getPlayers())
+	for i = 1, #players do
+		players[i]:getPlayer():addPotionEffect(newInstance("$.potion.PotionEffect", {effect.HEAL, 1, 0}))
+	end
 end
 
 function setFoodLevel()
