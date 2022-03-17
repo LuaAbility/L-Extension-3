@@ -30,7 +30,7 @@ function onTimer(player, ability)
 		count = 0
 	end
 
-	count = count + 2
+	count = count + 1
 
 	local str = ""
 	local beat = player:getVariable("EX048-beat") 

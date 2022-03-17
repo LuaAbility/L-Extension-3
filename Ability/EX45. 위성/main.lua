@@ -32,12 +32,12 @@ function onTimer(player, ability)
 		local timeCount = player:getVariable("EX045-abilityTime")
 		
 		if fastRevolution > 0 then
-			fastRevolution = fastRevolution - 2
+			fastRevolution = fastRevolution - 1
 			timeCount = timeCount + 8
 			player:setVariable("EX045-fastRevolution", fastRevolution)
 		end
 		
-		timeCount = timeCount + 2
+		timeCount = timeCount + 1
 		circleEffect(player, timeCount % circleDelay)
 		player:setVariable("EX045-abilityTime", timeCount)
 		player:setVariable("EX045-move", newInstance("$.util.Vector", {0, 0, 0}))

@@ -30,7 +30,7 @@ function onTimer(player, ability)
 	
 	local abilityTime = player:getVariable("EX042-abilityTime")
 	if abilityTime > 0 then
-		abilityTime = abilityTime - 2
+		abilityTime = abilityTime - 1
 		if abilityTime <= 0 then
 			game.sendMessage(player:getPlayer(), "§1[§b블랙잭§1] §b누적 숫자가 초기화됩니다.")
 			player:setVariable("EX042-count", 0)

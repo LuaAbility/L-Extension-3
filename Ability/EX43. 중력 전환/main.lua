@@ -14,7 +14,7 @@ function onTimer(player, ability)
 
 	local abilityTime = player:getVariable("EX043-abilityTime")
 	if abilityTime > 0 then
-		abilityTime = abilityTime - 2
+		abilityTime = abilityTime - 1
 		if abilityTime <= 0 then resetGravity(player)
 		else gravity(player) end
 		player:setVariable("EX043-abilityTime", abilityTime) 

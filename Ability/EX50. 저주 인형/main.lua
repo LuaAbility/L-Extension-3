@@ -22,7 +22,7 @@ function onTimer(player, ability)
 	end
 	
 	if count > 0 then
-		count = count - 2
+		count = count - 1
 		if count <= 0 then
 			Reset(player, ability)
 		end

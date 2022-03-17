@@ -16,7 +16,7 @@ function onTimer(player, ability)
 	end
 	
 	if count > 0 then
-		count = count - 2
+		count = count - 1
 		
 		if count == 0 then
             game.sendMessage(player:getPlayer(), "§1[§b도둑잡기§1] §b재사용 대기시간이 종료되었습니다. (조커 카드 주기)")

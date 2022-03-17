@@ -48,5 +48,5 @@ function saveDir(player)
 	table.insert(tables, player:getPlayer():getLocation())
 	
 	table.insert(data, tables)
-	if #data > 25 then table.remove(data, 1) end
+	if #data > 50 then table.remove(data, 1) end
 end
