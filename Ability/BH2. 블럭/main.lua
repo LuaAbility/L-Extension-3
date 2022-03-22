@@ -60,7 +60,7 @@ function onTimer(player, ability)
 		if count <= 0 then game.sendMessage(player:getPlayer(), "§2[§a블럭§2] §a능력 시전 시간이 종료되었습니다. (술래 혼란)") end
 	end
 	
-	count = count - 2 
+	count = count - 1 
 	player:setVariable("BH002-abilityTime", count)
 end
 

@@ -11,8 +11,8 @@ end
 function onTimer(player, ability) 
 	local count = player:getVariable("EX049-abilityTime")
 	if count == nil then 
-		player:setVariable("EX049-abilityTime", 1200)
-		count = 1200
+		player:setVariable("EX049-abilityTime", 600)
+		count = 600
 	end
 	
 	if count > 0 then
@@ -50,7 +50,7 @@ function abilityUse(LAPlayer, event, ability, id)
 				local count = LAPlayer:getVariable("EX049-abilityTime")
 				if count then
 					if count <= 0 then
-						LAPlayer:setVariable("EX049-abilityTime", 1200)
+						LAPlayer:setVariable("EX049-abilityTime", 600)
 						util.runLater(function()
 							game.removeAbility(LAPlayer, ability, false)
 							game.addAbility(game.getPlayer(event:getEntity()), ability.abilityID)

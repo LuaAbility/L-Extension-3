@@ -46,7 +46,7 @@ function Init()
 	plugin.abilityCheckOption(true) -- 능력 확인 옵션입니다. 플레이어가 자신의 능력을 확인할 수 있는 지 정합니다.
 	plugin.cooldownMultiplyOption(1.0) -- 능력 쿨타임 옵션입니다. 해당 값만큼 쿨타임 값에 곱해져 적용됩니다. (예: 0.5일 경우 쿨타임이 기본 쿨타임의 50%, 2.0일 경우 쿨타임이 기본 쿨타임의 200%)
 	plugin.setResourcePackPort(13356)
-	plugin.getPlugin().useResourcePack = true
+	plugin.getPlugin().useResourcePack = false
 	game.setMaxHealth(20)
 	
 	-- 실질적 무능력 능력

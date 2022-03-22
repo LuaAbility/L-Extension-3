@@ -54,7 +54,7 @@ function useAbility(LAPlayer, event, ability, id)
 					local question = LAPlayer:getVariable("EX051-currentQuestion")
 					if question > 0 then
 						LAPlayer:setVariable("EX051-currentQuestion", question - 1)
-						local players = util.getTableFromList(game.getPlayers())
+						local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 						for i = 1, #players do
 							if players[i]:getPlayer() ~= event:getPlayer() then
 								if event:getPlayer():getWorld():getEnvironment() == players[i]:getPlayer():getWorld():getEnvironment() and
@@ -84,7 +84,7 @@ function useAbility(LAPlayer, event, ability, id)
 					local question = LAPlayer:getVariable("EX051-currentQuestion")
 					if question > 0 then
 						LAPlayer:setVariable("EX051-currentQuestion", 0)
-						local players = util.getTableFromList(game.getPlayers())
+						local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 						for i = 1, #players do
 							if players[i]:getPlayer() ~= event:getPlayer() then
 								if event:getPlayer():getWorld():getEnvironment() == players[i]:getPlayer():getWorld():getEnvironment() and

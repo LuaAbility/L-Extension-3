@@ -41,12 +41,12 @@ end
 function cancelDamage(LAPlayer, event, ability, id)
 	local voodooDoll = LAPlayer:getVariable("EX050-voodooDoll")
 	if voodooDoll ~= nil and event:getEntity() == voodooDoll then
-		local players = util.getTableFromList(game.getPlayers())
+		local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 		local playerName = LAPlayer:getVariable("EX050-targetPlayer") 
 		
 		for i = 1, #players do
 			if players[i]:getPlayer():getName() == playerName then	
-				players[i]:getPlayer():damage(event:getDamage() * 0.7, LAPlayer:getPlayer())
+				players[i]:getPlayer():damage(event:getDamage() * 0.5, LAPlayer:getPlayer())
 				voodooDoll:getWorld():spawnParticle(import("$.Particle").CRIT, voodooDoll:getLocation():add(0, 1, 0), 30, 0.25, 0.7, 0.25, 0.1)
 				voodooDoll:getWorld():spawnParticle(import("$.Particle").SMOKE_NORMAL, voodooDoll:getLocation():add(0, 1, 0), 50, 0.25, 0.7, 0.25, 0.05)
 				voodooDoll:getWorld():playSound(voodooDoll:getLocation(), import("$.Sound").ENTITY_PLAYER_ATTACK_CRIT, 0.5, 1)
@@ -59,7 +59,7 @@ end
 function summonDoll(LAPlayer, event, ability, id)
 	if game.checkCooldown(LAPlayer, game.getPlayer(event:getPlayer()), ability, id) then
 		local playerName = event:getLine(0)
-		local players = util.getTableFromList(game.getPlayers())
+		local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 		for i = 1, #players do
 			if players[i]:getPlayer():getName() == playerName then
 				if game.targetPlayer(LAPlayer, players[i]) then

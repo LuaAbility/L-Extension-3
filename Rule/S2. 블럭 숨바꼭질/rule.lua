@@ -26,6 +26,7 @@ function Init()
 	plugin.cooldownMultiplyOption(1.0)
 	plugin.setResourcePackPort(13356)
 	plugin.getPlugin().useResourcePack = false
+	game.setMaxHealth(20)
 
 	plugin.registerRuleEvent("PlayerDeathEvent", "eliminate")
 	plugin.registerRuleEvent("PlayerJoinEvent", "spectator")
@@ -49,7 +50,7 @@ function onTimer()
 		giveItem(true, items)
 	end
 	
-	count = count + 2
+	count = count + 1
 	
 	setFoodLevel()
 	bossbar(count)

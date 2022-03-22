@@ -28,7 +28,7 @@ function useAbility(LAPlayer, event, ability, id)
 				if game.checkCooldown(LAPlayer, game.getPlayer(event:getPlayer()), ability, id) then
 					LAPlayer:setVariable("EX043-abilityTime", 200) 
 					
-					local players = util.getTableFromList(game.getPlayers())
+					local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 					for i = 1, #players do
 						if players[i] ~= player then 
 							players[i]:getPlayer():setVelocity(players[i]:getPlayer():getVelocity():add(newInstance("$.util.Vector", {0, 0.3, 0})))
@@ -45,16 +45,16 @@ function Reset(player, ability)
 end
 
 function resetGravity(player)
-	local players = util.getTableFromList(game.getPlayers())
+	local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(player, false))
 	for i = 1, #players do
-		if players[i] then players[i]:getPlayer():setGravity(true) end
+		players[i]:getPlayer():setGravity(true)
 	end
 end
 
 function gravity(player)
-	local players = util.getTableFromList(game.getPlayers())
+	local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(player, false))
 	for i = 1, #players do
-		if players[i] and game.targetPlayer(player, players[i], false) then 
+		if game.targetPlayer(player, players[i], false) then 
 			game.sendActionBarMessage(players[i]:getPlayer(), "§a중력 전환!")
 			local addVector = newInstance("$.util.Vector", {0.1 + players[i]:getPlayer():getVelocity():getX() * 0.15, 0, 0})
 			local velocity = players[i]:getPlayer():getVelocity():add(addVector)
