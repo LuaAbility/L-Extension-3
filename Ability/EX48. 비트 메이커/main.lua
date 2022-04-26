@@ -48,7 +48,7 @@ function onTimer(player, ability)
 		if i ~= 4 then str = str .. "§a - " end
 	end
 	
-	game.sendActionBarMessage(player:getPlayer(), str)
+	game.sendActionBarMessage(player:getPlayer(), "EX048", str)
 	
 	player:setVariable("EX048-abilityTime", count) 
 end
@@ -75,13 +75,17 @@ function useAbility(LAPlayer, event, ability, id)
 	end
 end
 
+function Reset(player, ability)
+	game.sendActionBarMessageToAll("EX048", "")
+end
+
 function checkDamage(LAPlayer, event, ability, id)
 	local damagee = event:getEntity()
-	local damager = event:getDamager()
-	if event:getCause():toString() == "PROJECTILE" then damager = event:getDamager():getShooter() end
+	local damager = util.getRealDamager(event:getDamager())
 	
 	
-	if not util.hasClass(damager, "org.bukkit.projectiles.BlockProjectileSource") and damagee:getType():toString() == "PLAYER" then
+	
+	if damager ~= nil and damagee:getType():toString() == "PLAYER" then
 		if game.checkCooldown(LAPlayer, game.getPlayer(damager), ability, id) then
 			local beat = LAPlayer:getVariable("EX048-beat") 
 			local bar = LAPlayer:getVariable("EX048-currentBar") 

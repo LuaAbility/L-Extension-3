@@ -46,7 +46,7 @@ function cancelDamage(LAPlayer, event, ability, id)
 		
 		for i = 1, #players do
 			if players[i]:getPlayer():getName() == playerName then	
-				players[i]:getPlayer():damage(event:getDamage() * 0.5, LAPlayer:getPlayer())
+				players[i]:getPlayer():damage(event:getDamage() * 0.5, event:getDamager())
 				voodooDoll:getWorld():spawnParticle(import("$.Particle").CRIT, voodooDoll:getLocation():add(0, 1, 0), 30, 0.25, 0.7, 0.25, 0.1)
 				voodooDoll:getWorld():spawnParticle(import("$.Particle").SMOKE_NORMAL, voodooDoll:getLocation():add(0, 1, 0), 50, 0.25, 0.7, 0.25, 0.05)
 				voodooDoll:getWorld():playSound(voodooDoll:getLocation(), import("$.Sound").ENTITY_PLAYER_ATTACK_CRIT, 0.5, 1)

@@ -2,26 +2,27 @@ local material = import("$.Material") -- 건들면 안됨!
 local effect = import("$.potion.PotionEffectType")  -- 건들면 안됨!
 local joinTick = 200 -- 입장 간격 (틱)
 
-local startX = 105 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
-local startY = 1 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
-local startZ = 87 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
+local startX = 0 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
+local startY = 100 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
+local startZ = 0 -- 시작 시 텔레포트 할 좌표 / 월드보더의 기준 좌표
 
 local startBorderSize = 50.0 -- 시작 시 월드 보더의 크기
-local endBorderSize = 5.0 -- 마지막 월드 보더의 크기
+local endBorderSize = 10.0 -- 마지막 월드 보더의 크기
 local borderChangeSecond = 30 -- 월드보더의 크기가 변화하는 시간
 	
 local abilityItem = material.IRON_INGOT -- 능력 시전 아이템
 local abilityItemName = "철괴" -- 능력 시전 아이템 이름
+local startExp = 100
 local startItem = {  -- 시작 시 지급 아이템
 	newInstance("$.inventory.ItemStack", {material.WATER_BUCKET, 1}),
 	newInstance("$.inventory.ItemStack", {material.IRON_INGOT, 64}),
 	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
 	newInstance("$.inventory.ItemStack", {material.IRON_SWORD, 1}),
 	newInstance("$.inventory.ItemStack", {material.FISHING_ROD, 1}),
-	newInstance("$.inventory.ItemStack", {material.OAK_SIGN, 5}),
-	newInstance("$.inventory.ItemStack", {material.SCAFFOLDING, 20}),
+	newInstance("$.inventory.ItemStack", {material.OAK_SIGN, 10}),
+	newInstance("$.inventory.ItemStack", {material.SCAFFOLDING, 40}),
 	newInstance("$.inventory.ItemStack", {material.BOW, 1}),
-	newInstance("$.inventory.ItemStack", {material.ARROW, 20})
+	newInstance("$.inventory.ItemStack", {material.ARROW, 10})
 }
 
 local startEquip = {  -- 시작 시 지급 아이템
@@ -47,6 +48,9 @@ function Init()
 	plugin.cooldownMultiplyOption(1.0) -- 능력 쿨타임 옵션입니다. 해당 값만큼 쿨타임 값에 곱해져 적용됩니다. (예: 0.5일 경우 쿨타임이 기본 쿨타임의 50%, 2.0일 경우 쿨타임이 기본 쿨타임의 200%)
 	plugin.setResourcePackPort(13356)
 	plugin.getPlugin().useResourcePack = true
+	plugin.getPlugin().burntBlock = false
+	plugin.getPlugin().explodeBlock = false
+	plugin.getPlugin().autoSkipTimer = 30
 	game.setMaxHealth(20)
 	
 	-- 실질적 무능력 능력
@@ -75,14 +79,6 @@ function Init()
 	plugin.banAbilityID("LA-EX-029")
 	plugin.banAbilityID("LA-EX-013")
 	plugin.banAbilityID("LA-EX-008")
-	
-	plugin.banAbilityID("LA-EX-003")
-	plugin.banAbilityID("LA-EX-008")
-	plugin.banAbilityID("LA-EX-008")
-	plugin.banAbilityID("LA-HS-003")
-	plugin.banAbilityID("LA-HS-006")
-	plugin.banAbilityID("LA-HS-010")
-	plugin.banAbilityID("LA-HS-012")
 
 	plugin.registerRuleEvent("PlayerDeathEvent", "eliminate")
 	plugin.registerRuleEvent("PlayerJoinEvent", "spectator")
@@ -180,7 +176,7 @@ function teleport()
 	for i = 1, #players do
 		players[i]:getPlayer():getInventory():clear()
 		players[i]:getPlayer():setHealth(players[i]:getPlayer():getAttribute(import("$.attribute.Attribute").GENERIC_MAX_HEALTH):getBaseValue())
-		players[i]:getPlayer():teleport(newInstance("$.Location", { players[i]:getPlayer():getWorld(), startX, startY + 20, startZ }) )
+		players[i]:getPlayer():teleport(newInstance("$.Location", { players[i]:getPlayer():getWorld(), startX, startY + 10, startZ }) )
 		players[i]:getPlayer():setGameMode(import("$.GameMode").SPECTATOR)
 		players[i]:setVariable("abilityLock", true)
 	end
@@ -318,15 +314,14 @@ function join()
 	title = title .. "랭크 플레이어 §6" .. playerQueue[1]:getPlayer():getName() .. "§e님이 게임에 참여하셨습니다."
 	game.broadcastMessage(title)
 	
-	util.runLater(function()
-		joinPlayer:getPlayer():setHealth(joinPlayer:getPlayer():getAttribute(import("$.attribute.Attribute").GENERIC_MAX_HEALTH):getBaseValue())
-	end, 2)
+	joinPlayer:getPlayer():setHealth(joinPlayer:getPlayer():getAttribute(import("$.attribute.Attribute").GENERIC_MAX_HEALTH):getBaseValue())
 	
 	table.remove(playerQueue, 1)
 	
 	local players = util.getTableFromList(game.getPlayers())
 	for i = 1, #players do
 		players[i]:getPlayer():addPotionEffect(newInstance("$.potion.PotionEffect", {effect.HEAL, 1, 0}))
+		players[i]:getPlayer():addPotionEffect(newInstance("$.potion.PotionEffect", {effect.SLOW_FALLING, 0, 100}))
 	end
 end
 
@@ -362,10 +357,10 @@ function eliminate(event)
 	
 		if (damageEvent ~= nil and damageEvent:isCancelled() == false and damageEvent:getEventName() == "EntityDamageByEntityEvent") then
 			local damagee = damageEvent:getEntity()
-			local damager = damageEvent:getDamager()
-			if damageEvent:getCause():toString() == "PROJECTILE" then damager = damageEvent:getDamager():getShooter() end
+			local damager = util.getRealDamager(damageEvent:getDamager())
 			
-			if not util.hasClass(damager, "org.bukkit.projectiles.BlockProjectileSource") and damager:getType():toString() == "PLAYER" and damagee:getType():toString() == "PLAYER" then
+			
+			if damager ~= nil and damager:getType():toString() == "PLAYER" and damagee:getType():toString() == "PLAYER" then
 				damager:getInventory():addItem( { newInstance("$.inventory.ItemStack", {material.GOLDEN_APPLE, 1}) } )
 			end
 		end
@@ -403,6 +398,7 @@ function bossbar(count)
 			bossbar = timeBossbar
 		end
 		
+		game.sendActionBarMessageToAll("LA-MAIN", "")
 		if #playerQueue > 0 then
 			local timedata = count / joinTick
 			if timedata > 1 then timedata = 1 end
@@ -424,7 +420,7 @@ function bossbar(count)
 			end
 			
 			bossbar:setTitle(title)
-			game.sendActionBarMessage(playerQueue[1]:getPlayer(), "§a다음 순서입니다! 준비하세요...")
+			game.sendActionBarMessage(playerQueue[1]:getPlayer(), "LA-MAIN", "§a다음 순서입니다! 준비하세요...")
 		elseif count <= borderChangeSecond * 20 then
 			local timedata = count / (borderChangeSecond * 20)
 			if timedata > 1 then timedata = 1 end
@@ -456,7 +452,7 @@ function reductWorldBorder()
 	if border ~= nil then
 		border:setSize(endBorderSize, borderChangeSecond)
 		border:setDamageAmount(0.1)
-		border:setDamageBuffer(1)
+		border:setDamageBuffer(0)
 		game.broadcastMessage("§4[§cLAbility§4] §c지금부터 월드의 크기가 작아집니다!")
 		game.broadcastMessage("§4[§cLAbility§4] §c크기는 ".. borderChangeSecond .. "초 동안 축소됩니다.")
 		game.broadcastMessage("§4[§cLAbility§4] §c기준 좌표 - X : " .. startX .. " / Z : " .. startZ)

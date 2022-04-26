@@ -1,5 +1,5 @@
 function Init(abilityData)
-	plugin.registerEvent(abilityData, "중력 전환", "PlayerInteractEvent", 1800)
+	plugin.registerEvent(abilityData, "중력 전환", "PlayerInteractEvent", 1200)
 	plugin.registerEvent(abilityData, "EX043-calculateDamage", "EntityDamageEvent", 0)
 end
 
@@ -26,7 +26,7 @@ function useAbility(LAPlayer, event, ability, id)
 		if event:getItem() ~= nil then
 			if game.isAbilityItem(event:getItem(), "IRON_INGOT") then
 				if game.checkCooldown(LAPlayer, game.getPlayer(event:getPlayer()), ability, id) then
-					LAPlayer:setVariable("EX043-abilityTime", 200) 
+					LAPlayer:setVariable("EX043-abilityTime", 100) 
 					
 					local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(LAPlayer, false))
 					for i = 1, #players do
@@ -42,6 +42,7 @@ end
 
 function Reset(player, ability)
 	resetGravity(player)
+	game.sendActionBarMessageToAll("EX043", "")
 end
 
 function resetGravity(player)
@@ -49,13 +50,15 @@ function resetGravity(player)
 	for i = 1, #players do
 		players[i]:getPlayer():setGravity(true)
 	end
+	
+	game.sendActionBarMessageToAll("EX043", "")
 end
 
 function gravity(player)
 	local players = util.getTableFromList(game.getTeamManager():getOpponentTeam(player, false))
 	for i = 1, #players do
 		if game.targetPlayer(player, players[i], false) then 
-			game.sendActionBarMessage(players[i]:getPlayer(), "§a중력 전환!")
+			game.sendActionBarMessage(players[i]:getPlayer(), "EX043", "§a중력 전환!")
 			local addVector = newInstance("$.util.Vector", {0.1 + players[i]:getPlayer():getVelocity():getX() * 0.15, 0, 0})
 			local velocity = players[i]:getPlayer():getVelocity():add(addVector)
 			velocity:setY(velocity:getY() * 0.5)

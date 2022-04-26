@@ -7,8 +7,11 @@ function onEvent(funcTable)
 end
 
 function onTimer(player, ability)
-	if player:getVariable("EX041-data") == nil then player:setVariable("EX041-data", { }) end	
-	saveDir(player)
+	if player:getVariable("EX041-data") == nil then 
+		player:setVariable("EX041-data", { }) 
+		player:setVariable("EX041-save", true) 
+	end	
+	if player:getVariable("EX041-save") then saveDir(player) end
 end
 
 function useAbility(LAPlayer, event, ability, id)
@@ -16,6 +19,7 @@ function useAbility(LAPlayer, event, ability, id)
 		if event:getItem() ~= nil then
 			if game.isAbilityItem(event:getItem(), "IRON_INGOT") then
 				if game.checkCooldown(LAPlayer, game.getPlayer(event:getPlayer()), ability, id) then
+					LAPlayer:setVariable("EX041-save", false)
 					local data = LAPlayer:getVariable("EX041-data")
 					local gamemode = event:getPlayer():getGameMode()
 					local gravity = event:getPlayer():hasGravity()
@@ -33,6 +37,8 @@ function useAbility(LAPlayer, event, ability, id)
 								event:getPlayer():setGravity(gravity)	
 							end
 						end, #data - i)
+						
+						util.runLater(function() LAPlayer:setVariable("EX041-save", true) end, #data)
 					end
 				end
 			end
@@ -48,5 +54,6 @@ function saveDir(player)
 	table.insert(tables, player:getPlayer():getLocation())
 	
 	table.insert(data, tables)
-	if #data > 50 then table.remove(data, 1) end
+	
+	if #data > 50 then table.remove(data, 1)  end
 end

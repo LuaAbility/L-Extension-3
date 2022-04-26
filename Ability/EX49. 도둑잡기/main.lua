@@ -51,11 +51,11 @@ function abilityUse(LAPlayer, event, ability, id)
 				if count then
 					if count <= 0 then
 						LAPlayer:setVariable("EX049-abilityTime", 600)
-						util.runLater(function()
-							game.removeAbility(LAPlayer, ability, false)
-							game.addAbility(game.getPlayer(event:getEntity()), ability.abilityID)
-							game.sendMessage(event:getEntity(), "§4[§c도둑잡기§4] §c조커 카드를 받았습니다! 액티브 능력 사용이 불가능합니다." )
-						end, 1)
+						
+						game.removeAbility(LAPlayer, ability, false)
+						game.addAbility(game.getPlayer(event:getEntity()), ability.abilityID, false)
+						game.sendMessage(event:getEntity(), "§4[§c도둑잡기§4] §c조커 카드를 받았습니다! 액티브 능력 사용이 불가능합니다." )
+						game.sendMessage(event:getEntity(), "§4[§c도둑잡기§4] §c30초 뒤, 적을 타격하여 조커 카드를 줄 수 있습니다." )
 					else
 						game.sendMessage(event:getDamager(), "§1[§b도둑잡기§1] §b재사용 대기시간 입니다. (" .. (count / 20) .. "초 / 조커 카드 주기)" )
 					end

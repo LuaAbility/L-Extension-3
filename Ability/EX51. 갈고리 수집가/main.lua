@@ -21,7 +21,7 @@ function onTimer(player, ability)
 		count = 0
 	end
 	
-	if player:getVariable("EX051-timerTime") > 600 and player:getVariable("EX051-currentQuestion") < 10 then
+	if player:getVariable("EX051-timerTime") > 200 and player:getVariable("EX051-currentQuestion") < 10 then
 		player:setVariable("EX051-currentQuestion", count + 1)
 		player:getPlayer():spawnParticle(import("$.Particle").SMOKE_NORMAL, player:getPlayer():getLocation():add(0,1,0), 50, 0.5, 0.5, 0.5, 0.05)
 		player:getPlayer():playSound(player:getPlayer():getLocation(), import("$.Sound").BLOCK_ANVIL_PLACE, 0.25, 2)
@@ -31,13 +31,18 @@ function onTimer(player, ability)
 	
 	player:setVariable("EX051-timerTime", player:getVariable("EX051-timerTime") + 1)
 	
-	game.sendActionBarMessage(player:getPlayer(), "§a수집한 갈고리 §6: §b" .. count .. "개")
+	game.sendActionBarMessage(player:getPlayer(), "EX051", "§a수집한 갈고리 §6: §b" .. count .. "개")
+end
+
+function Reset(player, ability)
+	game.sendActionBarMessageToAll("EX051", "")
 end
 
 function collectQuestion(LAPlayer, event, ability, id)
 	if event:getPlayer() ~= LAPlayer:getPlayer() then
 		local count = LAPlayer:getVariable("EX051-currentQuestion")
-		if event:getMessage() ~= nil and string.find(event:getMessage(), "?") and string.find(event:getMessage(), "?") > 0 and count < 10 then
+		local lap = game.getPlayer(event:getPlayer())
+		if lap and lap.isSurvive and event:getMessage() ~= nil and string.find(event:getMessage(), "?") and string.find(event:getMessage(), "?") > 0 and count < 10 then
 			LAPlayer:setVariable("EX051-currentQuestion", count + 1)
 			LAPlayer:getPlayer():spawnParticle(import("$.Particle").SMOKE_NORMAL, LAPlayer:getPlayer():getLocation():add(0,1,0), 50, 0.5, 0.5, 0.5, 0.05)
 			LAPlayer:getPlayer():playSound(LAPlayer:getPlayer():getLocation(), import("$.Sound").BLOCK_ANVIL_PLACE, 0.25, 2)

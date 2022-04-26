@@ -25,7 +25,7 @@ function onTimer(player, ability)
 		elseif (count % 2) == 0 then currentText = currentText .. " §2[§a피격 데미지 0.75배§2]" end
 	end
 	
-	game.sendActionBarMessage(player:getPlayer(), currentText)
+	game.sendActionBarMessage(player:getPlayer(), "EX042", currentText)
 	setVariable(player)
 	
 	local abilityTime = player:getVariable("EX042-abilityTime")
@@ -105,10 +105,10 @@ end
 
 function calculateDamage(LAPlayer, event, ability, id)
 	local damagee = event:getEntity()
-	local damager = event:getDamager()
-	if event:getCause():toString() == "PROJECTILE" then damager = event:getDamager():getShooter() end
+	local damager = util.getRealDamager(event:getDamager())
 	
-	if not util.hasClass(damager, "org.bukkit.projectiles.BlockProjectileSource") and damager:getType():toString() == "PLAYER" and damagee:getType():toString() == "PLAYER" then
+	
+	if damager ~= nil and damager:getType():toString() == "PLAYER" and damagee:getType():toString() == "PLAYER" then
 		if game.checkCooldown(LAPlayer, game.getPlayer(damagee), ability, id) then
 			print(event:getDamage() * LAPlayer:getVariable("EX042-defense"))
 			event:setDamage(event:getDamage() * LAPlayer:getVariable("EX042-defense"))
@@ -117,4 +117,8 @@ function calculateDamage(LAPlayer, event, ability, id)
 			event:setDamage(event:getDamage() * LAPlayer:getVariable("EX042-attack"))
 		end
 	end
+end
+
+function Reset(player, ability)
+	game.sendActionBarMessageToAll("EX042", "")
 end

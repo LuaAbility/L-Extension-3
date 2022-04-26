@@ -63,12 +63,10 @@ end
 
 function cancelTarget(LAPlayer, event, ability, id)
 	if event:getTarget() ~= nil and event:getEntity() ~= nil then
-		if game.checkCooldown(LAPlayer, game.getPlayer(event:getTarget()), ability, id) then
-			local guard = LAPlayer:getVariable("EX044-guard")
-			if guard ~= nil and event:getEntity() == guard and game.getTeamManager():getMyTeam(LAPlayer:getTeam(), false):contains(game.getPlayer(event:getTarget())) then
-				event:setTarget(nil)
-				event:setCancelled(true)
-			end
+		local guard = LAPlayer:getVariable("EX044-guard")
+		if guard ~= nil and event:getEntity() == guard and game.getTeamManager():getMyTeam(LAPlayer, false):contains(game.getPlayer(event:getTarget())) then
+			event:setTarget(nil)
+			event:setCancelled(true)
 		end
 	end
 end
