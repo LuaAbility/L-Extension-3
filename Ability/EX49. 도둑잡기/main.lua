@@ -19,7 +19,7 @@ function onTimer(player, ability)
 		count = count - 1
 		
 		if count == 0 then
-            game.sendMessage(player:getPlayer(), "§1[§b도둑잡기§1] §b재사용 대기시간이 종료되었습니다. (조커 카드 주기)")
+            game.sendMessage(player:getPlayer(), "§1[§b도둑잡기§1] §b쿨타임이 종료되었습니다. (조커 카드 주기)")
             player:getPlayer():playSound(player:getPlayer(), import("$.Sound").ENTITY_PLAYER_LEVELUP, 0.5, 2)
         elseif count == 20 then
 			game.sendMessage(player:getPlayer(), "§1[§b도둑잡기§1] §b남은 시간 : 1초 (조커 카드 주기)")
@@ -57,7 +57,7 @@ function abilityUse(LAPlayer, event, ability, id)
 						game.sendMessage(event:getEntity(), "§4[§c도둑잡기§4] §c조커 카드를 받았습니다! 액티브 능력 사용이 불가능합니다." )
 						game.sendMessage(event:getEntity(), "§4[§c도둑잡기§4] §c30초 뒤, 적을 타격하여 조커 카드를 줄 수 있습니다." )
 					else
-						game.sendMessage(event:getDamager(), "§1[§b도둑잡기§1] §b재사용 대기시간 입니다. (" .. (count / 20) .. "초 / 조커 카드 주기)" )
+						game.sendMessage(event:getDamager(), "§1[§b도둑잡기§1] §b쿨타임 입니다. (" .. (count / 20) .. "초 / 조커 카드 주기)" )
 					end
 				end
 			end
